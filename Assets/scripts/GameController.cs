@@ -11,6 +11,8 @@ public class GameController : MonoBehaviour {
 	public Texture2D MindBarTexture = null;
 	public Texture2D MindBarContainerTexture = null;
 
+	public AudioClip MindLoadSound = null, DeathSound = null;
+
 	private List<GameObject> spawnPoints;
 
 	public GameObject currentCop = null;
@@ -22,6 +24,8 @@ public class GameController : MonoBehaviour {
 	private UnityOSCListener listener = null;
 
 	private float lastCopKill = 0f;
+
+	private AudioSource mindLoadSource = null, deathSoundSource = null;
 
 	public enum BlinkMode {
 		SILHOUTTE,
@@ -39,6 +43,18 @@ public class GameController : MonoBehaviour {
 		listener = this.GetComponent<UnityOSCListener>();
 		if (listener == null) {
 			listener = this.GetComponentInChildren<UnityOSCListener>();
+		}
+
+		if (MindLoadSound != null) {
+			mindLoadSource = this.gameObject.AddComponent<AudioSource>();
+			mindLoadSource.clip = MindLoadSound;
+			mindLoadSource.playOnAwake = false;
+		}
+
+		if (DeathSound != null) {
+			deathSoundSource = this.gameObject.AddComponent<AudioSource>();
+			deathSoundSource.clip = DeathSound;
+			deathSoundSource.playOnAwake = false;
 		}
 		
 		Invoke("spawnCop", 1.5f);
@@ -64,6 +80,17 @@ public class GameController : MonoBehaviour {
 				StartCoroutine(Blink ());
 			}
 
+			if (timeOverCop > 0f && timeOverCop < killTime) {
+				if (mindLoadSource != null) {
+					float pitch = 3f * (timeOverCop/killTime);
+					mindLoadSource.pitch = pitch;
+
+					if (!mindLoadSource.isPlaying) {
+						mindLoadSource.Play();
+					}
+				}
+			}
+
 			killCop();
 		}
 	}
@@ -85,6 +112,8 @@ public class GameController : MonoBehaviour {
 		if (SignalValueDebug) {
 			string signalDebug = listener.SignalValue.ToString() + "\n";
 			signalDebug += listener.SignalValue < listener.SignalThreshold ? "OFF" : "ON"; 
+			Color signalColor = listener.SignalValue < listener.SignalThreshold ? Color.yellow : Color.green;
+			GUI.color = signalColor;
 			GUI.Box(new Rect(5f, (Screen.height-55f), 100f, 50f), signalDebug); 
 		}
 	}
@@ -127,7 +156,12 @@ public class GameController : MonoBehaviour {
 		if (MouseDebugging) {
 			Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
 			Ray aim = Camera.main.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0f));
-			if (currentCop.renderer.bounds.IntersectRay(aim)) {
+			Renderer renderer = currentCop.renderer;
+			if (renderer == null || !renderer.enabled) {
+				renderer = currentCop.GetComponentInChildren<Renderer>();
+			}
+
+			if (renderer.bounds.IntersectRay(aim)) {
 				timeOverCop += Time.deltaTime;
 			}
 			else {
@@ -139,11 +173,30 @@ public class GameController : MonoBehaviour {
 		}
 
 		if (timeOverCop >= killTime) {
-			Destroy(currentCop.gameObject);
 			blinking = false;
+			lastCopKill = gameTime;
+
+			Animator anim = currentCop.GetComponent<Animator>();
+			if (anim == null) {
+				anim = currentCop.GetComponentInChildren<Animator>();
+			}
+
+			if (anim != null) {
+				anim.SetBool("Play", true);
+			}
+			else {
+				Debug.LogWarning("Could not find Animator component for cop: " + currentCop.name);
+			}
+
+			Invoke("DestroyCop", 1.1f);
+		}
+	}
+
+	private void DestroyCop() {
+		if (currentCop != null) {
+			Destroy(currentCop.gameObject);
 			currentCop = null;
 			timeOverCop = 0f;
-			lastCopKill = gameTime;
 		}
 	}
 
