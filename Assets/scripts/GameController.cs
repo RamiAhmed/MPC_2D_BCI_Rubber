@@ -55,6 +55,19 @@ public class GameController : MonoBehaviour {
 		
 		Invoke("spawnCop", 1.5f);
 	}
+
+	private Renderer getSillhoutteRenderer() {
+		if (currentCop != null) {
+			for (int i = 0; i < currentCop.transform.childCount; i++) {
+				if (currentCop.transform.GetChild(i).CompareTag("silu")) {
+					return currentCop.transform.GetChild(i).renderer;
+				}
+			}
+		}
+
+		Debug.LogWarning("Could not find Sillhoutte renderer for CurrentCop: " + currentCop.name);
+		return null;
+	}
 	
 	// Update is called once per frame
 	void FixedUpdate() {
@@ -67,9 +80,8 @@ public class GameController : MonoBehaviour {
 		}
 		else {
 			switch (CurrentBlinkMode) {
-				case BlinkMode.FULL_BODY: currentCop.transform.GetChild(0).renderer.sortingOrder = 3; break;
-				case BlinkMode.SILHOUTTE: currentCop.transform.GetChild(0).renderer.sortingOrder = 1; break;
-				case BlinkMode.BACKGROUND: break;
+				case BlinkMode.FULL_BODY: getSillhoutteRenderer().sortingOrder = 3; break;
+				case BlinkMode.SILHOUTTE: getSillhoutteRenderer().sortingOrder = 1; break;
 			}
 
 			if (!blinking) {
@@ -180,12 +192,8 @@ public class GameController : MonoBehaviour {
 			if (anim != null) {
 				anim.SetBool("Play", true);
 
-				for (int i = 0; i < currentCop.transform.childCount; i++) {
-					Transform child = currentCop.transform.GetChild(i);
-					if (child.CompareTag("silu")) {
-						Destroy(child.gameObject);
-						break;
-					}
+				if (getSillhoutteRenderer() != null) {
+					Destroy(getSillhoutteRenderer().gameObject);
 				}
 			}
 			else {
