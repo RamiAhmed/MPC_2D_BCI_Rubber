@@ -7,12 +7,20 @@ public class GameController : MonoBehaviour {
 	public List<GameObject> cops = new List<GameObject>();
 	public float gameTime = 0f, spawnFrequency = 60f, BlinksPerSecond = 2f;
 	public float killTime = 0;
+	
+	public Texture2D MindBarTexture = null;
+	public Texture2D MindBarContainerTexture = null;
+
 	private List<GameObject> spawnPoints;
 	private float lastSpawn = 0f;
 
 	private GameObject currentCop = null;
 	private bool blinking = false;
 	public float timeOverCop = 0f;
+
+	public bool MouseDebugging = false, SignalValueDebug = false;
+
+	private UnityOSCListener listener = null;
 
 	public enum BlinkMode {
 		SILHOUTTE,
@@ -26,6 +34,11 @@ public class GameController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		spawnPoints = new List<GameObject>( GameObject.FindGameObjectsWithTag("sp") );
+
+		listener = this.GetComponent<UnityOSCListener>();
+		if (listener == null) {
+			listener = this.GetComponentInChildren<UnityOSCListener>();
+		}
 
 		spawnCop ();
 	}
@@ -47,17 +60,34 @@ public class GameController : MonoBehaviour {
 		if (currentCop != null) {
 
 			switch (CurrentBlinkMode) {
-//				currentCop.GetComponent<SpriteRenderer>().order//
-				//currentCop.GetComponent<SpriteRenderer>().
-			case BlinkMode.FULL_BODY: currentCop.transform.GetChild(0).renderer.sortingOrder = 3; break;
-			case BlinkMode.SILHOUTTE: currentCop.transform.GetChild(0).renderer.sortingOrder = 1; break;
-			case BlinkMode.BACKGROUND: break;
+				case BlinkMode.FULL_BODY: currentCop.transform.GetChild(0).renderer.sortingOrder = 3; break;
+				case BlinkMode.SILHOUTTE: currentCop.transform.GetChild(0).renderer.sortingOrder = 1; break;
+				case BlinkMode.BACKGROUND: break;
 			}
 
 			if (!blinking) {
 				StartCoroutine(Blink ());
 			}
 			killCop();
+		}
+	}
+
+	
+	void OnGUI() {
+		float width = Screen.width * 0.99f,
+		height = Screen.height * 0.1f;
+		float x = (Screen.width/2f)-(width/2f), y = 5f;
+		
+		float barWidth = width * (1-(timeOverCop/killTime));
+		
+		GUI.BeginGroup(new Rect(x, y, barWidth, height));
+			GUI.DrawTexture(new Rect(0f, 0f, width, height), MindBarTexture, ScaleMode.StretchToFill);		
+		GUI.EndGroup();
+
+		GUI.DrawTexture(new Rect(x, y, width, height), MindBarContainerTexture, ScaleMode.StretchToFill);
+
+		if (SignalValueDebug) {
+			GUI.Box(new Rect(5f, (Screen.height-55f), 100f, 50f), listener.SignalValue.ToString()); 
 		}
 	}
 
@@ -120,10 +150,12 @@ public class GameController : MonoBehaviour {
 		Vector2 mousePos = new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y);
 		Ray aim = Camera.main.ScreenPointToRay (new Vector3 (mousePos.x, mousePos.y, 0));
 
-		if(currentCop.renderer.bounds.IntersectRay(aim)) 
-		{
-			timeOverCop+= Time.deltaTime;
-			if(timeOverCop > killTime)
+		if(currentCop.renderer.bounds.IntersectRay(aim)) {
+			if (MouseDebugging) {
+				timeOverCop += Time.deltaTime;
+			}
+
+			if(timeOverCop >= killTime)
 			{
 				Destroy(currentCop.gameObject);
 				blinking = false;
@@ -131,12 +163,18 @@ public class GameController : MonoBehaviour {
 				timeOverCop = 0f;
 			}
 		}
-		else 
-		{
-			timeOverCop = 0f;
+		else {
+			if (MouseDebugging) {
+				timeOverCop -= Time.deltaTime;
+				if (timeOverCop < 0f) {
+					timeOverCop = 0f;
+				}
+			}
 		}
 
 	}
+
+
 
 	private GameObject getRandomSpawnPoint() {
 		return spawnPoints[Random.Range(0, spawnPoints.Count)];
