@@ -183,6 +183,14 @@ public class GameController : MonoBehaviour {
 
 			if (anim != null) {
 				anim.SetBool("Play", true);
+
+				for (int i = 0; i < currentCop.transform.childCount; i++) {
+					Transform child = currentCop.transform.GetChild(i);
+					if (child.CompareTag("silu")) {
+						Destroy(child.gameObject);
+						break;
+					}
+				}
 			}
 			else {
 				Debug.LogWarning("Could not find Animator component for cop: " + currentCop.name);
@@ -194,14 +202,6 @@ public class GameController : MonoBehaviour {
 
 			if (deathSoundSource != null) {
 				deathSoundSource.Play();
-			}
-
-			for (int i = 0; i < currentCop.transform.childCount; i++) {
-				Transform child = currentCop.transform.GetChild(i);
-				if (child.CompareTag("silu")) {
-					Destroy(child);
-					break;
-				}
 			}
 
 			Invoke("DestroyCop", 1.1f);
