@@ -33,7 +33,7 @@ public class UnityOSCListener : MonoBehaviour  {
 					SignalValue = value;
 				}
 				else {
-					Debug.LogWarning("Signal was not float");
+					Debug.LogWarning("Signal was not float, value: " + signal.ToString());
 				}
 			}
 		}
