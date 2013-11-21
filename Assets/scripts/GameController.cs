@@ -13,8 +13,7 @@ public class GameController : MonoBehaviour {
 
 	public enum BlinkMode {
 		SILHOUTTE,
-		FULL_BODY,
-		BACKGROUND
+		FULL_BODY
 	};
 	
 	public BlinkMode CurrentBlinkMode = BlinkMode.SILHOUTTE;
