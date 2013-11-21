@@ -188,6 +188,22 @@ public class GameController : MonoBehaviour {
 				Debug.LogWarning("Could not find Animator component for cop: " + currentCop.name);
 			}
 
+			if (mindLoadSource != null) {
+				mindLoadSource.Stop();
+			}
+
+			if (deathSoundSource != null) {
+				deathSoundSource.Play();
+			}
+
+			for (int i = 0; i < currentCop.transform.childCount; i++) {
+				Transform child = currentCop.transform.GetChild(i);
+				if (child.CompareTag("silu")) {
+					Destroy(child);
+					break;
+				}
+			}
+
 			Invoke("DestroyCop", 1.1f);
 		}
 	}
