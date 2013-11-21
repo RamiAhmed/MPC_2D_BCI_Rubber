@@ -14,7 +14,7 @@ public class GameController : MonoBehaviour {
 	private List<GameObject> spawnPoints;
 	private float lastSpawn = 0f;
 
-	private GameObject currentCop = null;
+	public GameObject currentCop = null;
 	private bool blinking = false;
 	public float timeOverCop = 0f;
 
@@ -87,7 +87,9 @@ public class GameController : MonoBehaviour {
 		GUI.DrawTexture(new Rect(x, y, width, height), MindBarContainerTexture, ScaleMode.StretchToFill);
 
 		if (SignalValueDebug) {
-			GUI.Box(new Rect(5f, (Screen.height-55f), 100f, 50f), listener.SignalValue.ToString()); 
+			string signalDebug = listener.SignalValue.ToString() + "\n";
+			signalDebug += listener.SignalValue < listener.SignalThreshold ? "OFF" : "ON"; 
+			GUI.Box(new Rect(5f, (Screen.height-55f), 100f, 50f), signalDebug); 
 		}
 	}
 
@@ -150,26 +152,23 @@ public class GameController : MonoBehaviour {
 		Vector2 mousePos = new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y);
 		Ray aim = Camera.main.ScreenPointToRay (new Vector3 (mousePos.x, mousePos.y, 0));
 
-		if(currentCop.renderer.bounds.IntersectRay(aim)) {
-			if (MouseDebugging) {
+		if (MouseDebugging) {
+			if (currentCop.renderer.bounds.IntersectRay(aim)) {
 				timeOverCop += Time.deltaTime;
 			}
-
-			if(timeOverCop >= killTime)
-			{
-				Destroy(currentCop.gameObject);
-				blinking = false;
-				currentCop = null;
-				timeOverCop = 0f;
-			}
-		}
-		else {
-			if (MouseDebugging) {
+			else {
 				timeOverCop -= Time.deltaTime;
 				if (timeOverCop < 0f) {
 					timeOverCop = 0f;
 				}
 			}
+		}
+
+		if (timeOverCop >= killTime) {
+			Destroy(currentCop.gameObject);
+			blinking = false;
+			currentCop = null;
+			timeOverCop = 0f;
 		}
 
 	}

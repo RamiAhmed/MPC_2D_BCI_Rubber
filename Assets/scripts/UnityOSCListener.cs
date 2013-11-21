@@ -40,15 +40,20 @@ public class UnityOSCListener : MonoBehaviour  {
 		else {
 			Debug.LogWarning("Received unknown OSC address: " + address);
 		}
+	}
 
-		if (SignalValue > 0f) {
-			if (SignalValue < SignalThreshold) {
-				gameController.timeOverCop += Time.deltaTime;
+	void FixedUpdate() {
+		if (SignalValue > 0f && gameController.currentCop != null) {
+			if (SignalValue > SignalThreshold) {
+				if (gameController.timeOverCop <= gameController.killTime) {
+					gameController.timeOverCop += Time.deltaTime;
+				}
 			}
 			else {
-				gameController.timeOverCop -= Time.deltaTime;
+				if (gameController.timeOverCop > 0) {
+					gameController.timeOverCop -= Time.deltaTime;
+				}
 			}
 		}
 	}
-
 }
