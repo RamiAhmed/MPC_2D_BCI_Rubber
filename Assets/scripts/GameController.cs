@@ -60,12 +60,14 @@ public class GameController : MonoBehaviour {
 		if (currentCop != null) {
 			for (int i = 0; i < currentCop.transform.childCount; i++) {
 				if (currentCop.transform.GetChild(i).CompareTag("silu")) {
-					return currentCop.transform.GetChild(i).renderer;
+					if (currentCop.transform.GetChild(i).renderer != null) {
+						return currentCop.transform.GetChild(i).renderer;
+					}
 				}
 			}
 		}
 
-		Debug.LogWarning("Could not find Sillhoutte renderer for CurrentCop: " + currentCop.name);
+		//Debug.LogWarning("Could not find Sillhoutte renderer for CurrentCop: " + currentCop.name);
 		return null;
 	}
 	
@@ -79,15 +81,18 @@ public class GameController : MonoBehaviour {
 			}	
 		}
 		else {
-			switch (CurrentBlinkMode) {
-				case BlinkMode.FULL_BODY: getSillhoutteRenderer().sortingOrder = 3; break;
-				case BlinkMode.SILHOUTTE: getSillhoutteRenderer().sortingOrder = 1; break;
-			}
+			Renderer silu = getSillhoutteRenderer();
+			if (silu != null) {
+				switch (CurrentBlinkMode) {
+					case BlinkMode.FULL_BODY: silu.sortingOrder = 3; break;
+					case BlinkMode.SILHOUTTE: silu.sortingOrder = 1; break;
+				}
 
-			if (!blinking) {
-				StartCoroutine(Blink());
+				if (!blinking) {
+					StartCoroutine(Blink());
+				}
 			}
-
+			
 			if (timeOverCop > 0f && timeOverCop < killTime) {
 				if (mindLoadSource != null) {
 					float pitch = 3f * (timeOverCop/killTime);
@@ -133,17 +138,20 @@ public class GameController : MonoBehaviour {
 			Debug.Log ("BLINK ON " + currentCop);
 			float waitTime = 1f / BlinksPerSecond;
 			while (currentCop != null) {
-				if (currentCop != null) {
-					currentCop.transform.GetChild(0).renderer.enabled = false;
+				Renderer silu = getSillhoutteRenderer();
+				if (currentCop != null && silu != null) {
+					silu.enabled = false;
 				}
-
 				yield return new WaitForSeconds(waitTime);
 
-				if (currentCop != null) {
-					currentCop.transform.GetChild(0).renderer.enabled = true;
+				if (currentCop != null && silu != null) {
+					silu.enabled = true;
 				}
-
 				yield return new WaitForSeconds(waitTime);
+
+				if (!blinking || silu == null) {
+					break;
+				}
 			}
 		}
 	}
@@ -182,7 +190,6 @@ public class GameController : MonoBehaviour {
 
 		if (timeOverCop >= killTime) {
 			blinking = false;
-			lastCopKill = gameTime;
 
 			Animator anim = currentCop.GetComponent<Animator>();
 			if (anim == null) {
@@ -221,6 +228,7 @@ public class GameController : MonoBehaviour {
 			Destroy(currentCop.gameObject);
 			currentCop = null;
 			timeOverCop = 0f;
+			lastCopKill = gameTime;
 		}
 	}
 
