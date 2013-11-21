@@ -5,21 +5,27 @@ using System.Collections.Generic;
 public class GameController : MonoBehaviour {
 
 	public List<GameObject> cops = new List<GameObject>();
-	public float gameTime = 0f, spawnFrequency = 60f, BlinksPerSecond = 2f;
-	public float killTime = 0;
+	public float gameTime = 0f, spawnFrequency = 60f, BlinksPerSecond = 2f, killTime = 0f, timeOverCop = 0f;
 	
-	public Texture2D MindBarTexture = null;
-	public Texture2D MindBarContainerTexture = null;
+	public Texture2D MindBarTexture = null, MindBarContainerTexture = null;
 
 	public AudioClip MindLoadSound = null, DeathSound = null;
 
-	private List<GameObject> spawnPoints;
+	public enum BlinkMode {
+		SILHOUTTE,
+		FULL_BODY,
+		BACKGROUND
+	};
+	
+	public BlinkMode CurrentBlinkMode = BlinkMode.SILHOUTTE;
 
 	public GameObject currentCop = null;
-	private bool blinking = false;
-	public float timeOverCop = 0f;
 
 	public bool MouseDebugging = false, SignalValueDebug = false;
+
+	private List<GameObject> spawnPoints;
+
+	private bool blinking = false;
 
 	private UnityOSCListener listener = null;
 
@@ -27,18 +33,9 @@ public class GameController : MonoBehaviour {
 
 	private AudioSource mindLoadSource = null, deathSoundSource = null;
 
-	public enum BlinkMode {
-		SILHOUTTE,
-		FULL_BODY,
-		BACKGROUND,
-		NULL
-	};
-
-	public BlinkMode CurrentBlinkMode = BlinkMode.NULL;
-
 	// Use this for initialization
 	void Start () {
-		spawnPoints = new List<GameObject>( GameObject.FindGameObjectsWithTag("sp") );
+		spawnPoints = new List<GameObject>(GameObject.FindGameObjectsWithTag("sp"));
 
 		listener = this.GetComponent<UnityOSCListener>();
 		if (listener == null) {
@@ -77,7 +74,7 @@ public class GameController : MonoBehaviour {
 			}
 
 			if (!blinking) {
-				StartCoroutine(Blink ());
+				StartCoroutine(Blink());
 			}
 
 			if (timeOverCop > 0f && timeOverCop < killTime) {
