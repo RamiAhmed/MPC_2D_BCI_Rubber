@@ -6,10 +6,10 @@ using System.Collections.Generic;
 
 public class UnityOSCListener : MonoBehaviour  {
 
-
 	public string OSCAddressName = "sig";
 	public float SignalThreshold = 0.5f;
 
+	[HideInInspector]
 	public float SignalValue = 0f;
 
 	private GameController gameController = null;
@@ -29,7 +29,6 @@ public class UnityOSCListener : MonoBehaviour  {
 			foreach (object signal in args) {
 				float value;
 				if (float.TryParse(signal.ToString(), out value)) {
-					//Debug.Log("Signal value: " + value);
 					SignalValue = value;
 				}
 				else {
@@ -50,7 +49,7 @@ public class UnityOSCListener : MonoBehaviour  {
 				}
 			}
 			else {
-				if (gameController.timeOverCop > 0) {
+				if (gameController.timeOverCop > 0f) {
 					gameController.timeOverCop -= Time.deltaTime;
 				}
 			}
