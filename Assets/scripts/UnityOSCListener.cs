@@ -29,7 +29,7 @@ public class UnityOSCListener : MonoBehaviour  {
 			foreach (object signal in args) {
 				float value;
 				if (float.TryParse(signal.ToString(), out value)) {
-					Debug.Log("Signal value: " + value);
+					//Debug.Log("Signal value: " + value);
 					SignalValue = value;
 				}
 				else {

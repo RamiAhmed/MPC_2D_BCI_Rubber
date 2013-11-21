@@ -78,7 +78,7 @@ public class GameController : MonoBehaviour {
 		float barWidth = width * (1-(timeOverCop/killTime));
 		
 		GUI.BeginGroup(new Rect(x, y, barWidth, height));
-			GUI.DrawTexture(new Rect(0f, 0f, width, height), MindBarTexture, ScaleMode.StretchToFill);		
+			GUI.DrawTexture(new Rect(5f, 0f, width-5f, height), MindBarTexture, ScaleMode.StretchToFill);		
 		GUI.EndGroup();
 
 		GUI.DrawTexture(new Rect(x, y, width, height), MindBarContainerTexture, ScaleMode.StretchToFill);
@@ -97,12 +97,16 @@ public class GameController : MonoBehaviour {
 			Debug.Log ("BLINK ON " + currentCop);
 			float waitTime = 1f / BlinksPerSecond;
 			while (currentCop != null) {
-				//Debug.Log ("BLINK");
-				if(currentCop!=null)
+				if (currentCop != null) {
 					currentCop.transform.GetChild(0).renderer.enabled = false;
+				}
+
 				yield return new WaitForSeconds (waitTime);
-				if(currentCop!=null)
+
+				if (currentCop != null) {
 					currentCop.transform.GetChild(0).renderer.enabled = true;
+				}
+
 				yield return new WaitForSeconds (waitTime);
 			}
 		}
@@ -110,22 +114,20 @@ public class GameController : MonoBehaviour {
 
 	private void spawnCop() {
 		GameObject spawnPoint = getRandomSpawnPoint();
-		GameObject cop = getRandomCop ();
+		GameObject cop = getRandomCop();
 
-		GameObject newCop = Instantiate (cop) as GameObject;
+		GameObject newCop = Instantiate(cop) as GameObject;
 
 		newCop.transform.position = spawnPoint.transform.position;
 		newCop.transform.localScale = spawnPoint.transform.localScale;
 
 		currentCop = newCop;
-
 	}
 
 	private void killCop(){
-		Vector2 mousePos = new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-		Ray aim = Camera.main.ScreenPointToRay (new Vector3 (mousePos.x, mousePos.y, 0));
-
 		if (MouseDebugging) {
+			Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+			Ray aim = Camera.main.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0f));
 			if (currentCop.renderer.bounds.IntersectRay(aim)) {
 				timeOverCop += Time.deltaTime;
 			}
