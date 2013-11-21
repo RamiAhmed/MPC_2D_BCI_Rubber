@@ -42,7 +42,7 @@ public class UnityOSCListener : MonoBehaviour  {
 		}
 	}
 
-	void FixedUpdate() {
+	void Update() {
 		if (SignalValue > 0f && gameController.currentCop != null) {
 			if (SignalValue > SignalThreshold) {
 				if (gameController.timeOverCop <= gameController.killTime) {

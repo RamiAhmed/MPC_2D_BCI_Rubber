@@ -40,21 +40,20 @@ public class GameController : MonoBehaviour {
 		if (listener == null) {
 			listener = this.GetComponentInChildren<UnityOSCListener>();
 		}
-
-		spawnCop ();
+		
+		Invoke("spawnCop", 1.5f);
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update() {
 		gameTime += Time.deltaTime;
 
-		if (gameTime - lastCopKill > spawnFrequency) {
-			if (currentCop == null) {
+		if (currentCop == null) {
+			if (gameTime - lastCopKill > spawnFrequency) {
 				spawnCop();
 			}	
 		}
-
-		if (currentCop != null) {
+		else {
 			switch (CurrentBlinkMode) {
 				case BlinkMode.FULL_BODY: currentCop.transform.GetChild(0).renderer.sortingOrder = 3; break;
 				case BlinkMode.SILHOUTTE: currentCop.transform.GetChild(0).renderer.sortingOrder = 1; break;
@@ -75,7 +74,7 @@ public class GameController : MonoBehaviour {
 		height = Screen.height * 0.1f;
 		float x = (Screen.width/2f)-(width/2f), y = 5f;
 		
-		float barWidth = width * (1-(timeOverCop/killTime));
+		float barWidth = width * (1f - (timeOverCop/killTime));
 		
 		GUI.BeginGroup(new Rect(x, y, barWidth, height));
 			GUI.DrawTexture(new Rect(5f, 0f, width-5f, height), MindBarTexture, ScaleMode.StretchToFill);		
@@ -101,13 +100,13 @@ public class GameController : MonoBehaviour {
 					currentCop.transform.GetChild(0).renderer.enabled = false;
 				}
 
-				yield return new WaitForSeconds (waitTime);
+				yield return new WaitForSeconds(waitTime);
 
 				if (currentCop != null) {
 					currentCop.transform.GetChild(0).renderer.enabled = true;
 				}
 
-				yield return new WaitForSeconds (waitTime);
+				yield return new WaitForSeconds(waitTime);
 			}
 		}
 	}
