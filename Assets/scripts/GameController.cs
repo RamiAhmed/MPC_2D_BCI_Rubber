@@ -107,7 +107,7 @@ public class GameController : MonoBehaviour {
 		GUI.DrawTexture(new Rect(x, y, width, height), MindBarContainerTexture, ScaleMode.StretchToFill);
 
 		if (SignalValueDebug) {
-			string signalDebug = listener.SignalValue.ToString() + "\n";
+			string signalDebug = listener.SignalValue.ToString("F4") + "\n";
 			signalDebug += listener.SignalValue < listener.SignalThreshold ? "OFF" : "ON"; 
 			Color signalColor = listener.SignalValue < listener.SignalThreshold ? Color.yellow : Color.green;
 			GUI.color = signalColor;
