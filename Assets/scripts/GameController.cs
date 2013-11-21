@@ -194,11 +194,15 @@ public class GameController : MonoBehaviour {
 			}
 
 			if (mindLoadSource != null) {
-				mindLoadSource.Stop();
+				if (mindLoadSource.isPlaying) {
+					mindLoadSource.Stop();
+				}
 			}
 
 			if (deathSoundSource != null) {
-				deathSoundSource.Play();
+				if (!deathSoundSource.isPlaying) {
+					deathSoundSource.Play();
+				}
 			}
 
 			Invoke("DestroyCop", 1.1f);
