@@ -12,7 +12,6 @@ public class GameController : MonoBehaviour {
 	public Texture2D MindBarContainerTexture = null;
 
 	private List<GameObject> spawnPoints;
-	private float lastSpawn = 0f;
 
 	public GameObject currentCop = null;
 	private bool blinking = false;
@@ -21,6 +20,8 @@ public class GameController : MonoBehaviour {
 	public bool MouseDebugging = false, SignalValueDebug = false;
 
 	private UnityOSCListener listener = null;
+
+	private float lastCopKill = 0f;
 
 	public enum BlinkMode {
 		SILHOUTTE,
@@ -47,18 +48,13 @@ public class GameController : MonoBehaviour {
 	void Update () {
 		gameTime += Time.deltaTime;
 
-		if (gameTime - lastSpawn > spawnFrequency) {
-			lastSpawn = gameTime;
-
+		if (gameTime - lastCopKill > spawnFrequency) {
 			if (currentCop == null) {
 				spawnCop();
-			}
-		
-
+			}	
 		}
 
 		if (currentCop != null) {
-
 			switch (CurrentBlinkMode) {
 				case BlinkMode.FULL_BODY: currentCop.transform.GetChild(0).renderer.sortingOrder = 3; break;
 				case BlinkMode.SILHOUTTE: currentCop.transform.GetChild(0).renderer.sortingOrder = 1; break;
@@ -68,6 +64,7 @@ public class GameController : MonoBehaviour {
 			if (!blinking) {
 				StartCoroutine(Blink ());
 			}
+
 			killCop();
 		}
 	}
@@ -93,28 +90,6 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-	/* blinking cop
-	 IEnumerator Blink() {
-		if (!blinking) {
-			blinking = true;
-
-			Debug.Log ("BLINK ON " + currentCop);
-			float waitTime = 1f / BlinksPerSecond;
-			while (currentCop != null) {
-				Debug.Log ("BLINK");
-				currentCop.renderer.enabled = false;
-				yield return new WaitForSeconds (waitTime);
-				currentCop.renderer.enabled = true;
-				yield return new WaitForSeconds (waitTime);
-			}
-		} else {
-			Debug.Log("NOT BLINKING");
-		}
-	}
-	*/
-
-	// blinking silu
-
 	IEnumerator Blink() {
 		if (!blinking) {
 			blinking = true;
@@ -130,8 +105,6 @@ public class GameController : MonoBehaviour {
 					currentCop.transform.GetChild(0).renderer.enabled = true;
 				yield return new WaitForSeconds (waitTime);
 			}
-		} else {
-			//Debug.Log("NOT BLINKING");
 		}
 	}
 
@@ -169,11 +142,9 @@ public class GameController : MonoBehaviour {
 			blinking = false;
 			currentCop = null;
 			timeOverCop = 0f;
+			lastCopKill = gameTime;
 		}
-
 	}
-
-
 
 	private GameObject getRandomSpawnPoint() {
 		return spawnPoints[Random.Range(0, spawnPoints.Count)];
