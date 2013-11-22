@@ -70,8 +70,12 @@ public class GameController : MonoBehaviour {
 		//Debug.LogWarning("Could not find Sillhoutte renderer for CurrentCop: " + currentCop.name);
 		return null;
 	}
-	
-	// Update is called once per frame
+
+	void Update() {
+		if (Input.GetKeyDown(KeyCode.Escape)) 
+			Application.Quit();
+	}
+
 	void FixedUpdate() {
 		gameTime += Time.deltaTime;
 
