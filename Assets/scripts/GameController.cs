@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 
 public class GameController : MonoBehaviour {
 
@@ -32,6 +33,9 @@ public class GameController : MonoBehaviour {
 
 	private AudioSource mindLoadSource = null, deathSoundSource = null;
 
+	private float copAliveTime = 0f;
+	private int copCount = 0;
+
 	// Use this for initialization
 	void Start () {
 		spawnPoints = new List<GameObject>(GameObject.FindGameObjectsWithTag("sp"));
@@ -54,6 +58,8 @@ public class GameController : MonoBehaviour {
 		}
 		
 		Invoke("spawnCop", 1.5f);
+
+		startNewFileSection();
 	}
 
 	private Renderer getSillhoutteRenderer() {
@@ -85,6 +91,8 @@ public class GameController : MonoBehaviour {
 			}	
 		}
 		else {
+			copAliveTime += Time.deltaTime;
+
 			Renderer silu = getSillhoutteRenderer();
 			if (silu != null) {
 				switch (CurrentBlinkMode) {
@@ -170,6 +178,8 @@ public class GameController : MonoBehaviour {
 		newCop.transform.localScale = spawnPoint.transform.localScale;
 
 		currentCop = newCop;
+
+		copCount++;
 	}
 
 	private void killCop(){
@@ -190,6 +200,13 @@ public class GameController : MonoBehaviour {
 					timeOverCop = 0f;
 				}
 			}
+
+			if (!Screen.showCursor) 
+				Screen.showCursor = true;
+		}
+		else {
+			if (Screen.showCursor)
+				Screen.showCursor = false;
 		}
 
 		if (timeOverCop >= killTime) {
@@ -230,11 +247,38 @@ public class GameController : MonoBehaviour {
 
 	private void DestroyCop() {
 		if (currentCop != null) {
+			writeTimeToFile();
+
 			Destroy(currentCop.gameObject);
 			currentCop = null;
 			timeOverCop = 0f;
 			lastCopKill = gameTime;
+			copAliveTime = 0f;
 		}
+	}
+
+	private void writeTimeToFile() {
+		string path = Application.dataPath + "/data/";
+		string filename = "times.txt";
+		string text = "Cop " + copCount.ToString() + " lived for " + copAliveTime + " seconds." + System.Environment.NewLine;
+
+		if (!Directory.Exists(path)) {
+			Directory.CreateDirectory(path);
+		}
+
+		System.IO.File.AppendAllText(path + filename, text, System.Text.Encoding.UTF8);
+	}
+
+	private void startNewFileSection() {
+		string path = Application.dataPath + "/data/";
+		string filename = "times.txt";
+		string text = System.Environment.NewLine + "---------------------------------------------------------" + System.Environment.NewLine;
+
+		if (!Directory.Exists(path)) {
+			Directory.CreateDirectory(path);
+		}
+		
+		System.IO.File.AppendAllText(path + filename, text, System.Text.Encoding.UTF8);
 	}
 
 	private GameObject getRandomSpawnPoint() {
