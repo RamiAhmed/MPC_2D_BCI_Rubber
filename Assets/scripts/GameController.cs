@@ -93,7 +93,7 @@ public class GameController : MonoBehaviour {
 				}
 			}
 			
-			if (timeOverCop > 0f && timeOverCop < killTime) {
+			if (timeOverCop > 0f && timeOverCop <= killTime) {
 				if (mindLoadSource != null) {
 					float pitch = 3f * (timeOverCop/killTime);
 					mindLoadSource.pitch = pitch;
@@ -237,6 +237,6 @@ public class GameController : MonoBehaviour {
 	}
 
 	private GameObject getRandomCop() {
-		return cops [Random.Range (0, cops.Count)];
+		return cops[Random.Range(0, cops.Count)];
 	}
 }
