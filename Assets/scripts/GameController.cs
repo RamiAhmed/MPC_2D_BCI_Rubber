@@ -197,7 +197,8 @@ public class GameController : MonoBehaviour {
 			}
 
 			if (anim != null) {
-				anim.SetBool("Play", true);
+				if (!anim.GetBool("Play")) 
+					anim.SetBool("Play", true);
 
 				if (getSillhoutteRenderer() != null) {
 					Destroy(getSillhoutteRenderer().gameObject);
